@@ -1,8 +1,11 @@
 package academy.cashbackmerge.mandatory.mr1;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Disabled;
+import academy.cashbackmerge.config.CampaignConfig;
+import java.math.BigDecimal;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,30 +14,56 @@ import org.junit.jupiter.api.Test;
 class ConfigValidationTest {
 
     @Test
-    @Disabled("MR1: реализуй тест и удали эту строку")
     @DisplayName("Валидный конфиг принимается")
     void validConfigIsAccepted() {
-        fail("Тест не реализован");
+        assertDoesNotThrow(() -> new CampaignConfig(
+                4,
+                100,
+                Map.of(1, new BigDecimal("0.85"), 2, new BigDecimal("0.15")),
+                Map.of(2, 0, 4, 50, 8, 150, 16, 500, 32, 2000),
+                32,
+                new BigDecimal("0.20")));
     }
 
     @Test
-    @Disabled("MR1: реализуй тест и удали эту строку")
     @DisplayName("Сумма вероятностей spawn-правил не равна 1 — конфиг отклоняется")
     void probabilitiesNotSummingToOneAreRejected() {
-        fail("Тест не реализован");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new CampaignConfig(
+                        4,
+                        100,
+                        Map.of(1, new BigDecimal("0.80"), 2, new BigDecimal("0.15")), // 0.95 ≠ 1
+                        Map.of(2, 0, 4, 50, 8, 150, 16, 500, 32, 2000),
+                        32,
+                        new BigDecimal("0.20")));
     }
 
     @Test
-    @Disabled("MR1: реализуй тест и удали эту строку")
     @DisplayName("movesLimit <= 0 — конфиг отклоняется")
     void nonPositiveMovesLimitIsRejected() {
-        fail("Тест не реализован");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new CampaignConfig(
+                        4,
+                        0, // ← невалидно
+                        Map.of(1, new BigDecimal("0.85"), 2, new BigDecimal("0.15")),
+                        Map.of(2, 0, 4, 50, 8, 150, 16, 500, 32, 2000),
+                        32,
+                        new BigDecimal("0.20")));
     }
 
     @Test
-    @Disabled("MR1: реализуй тест и удали эту строку")
     @DisplayName("Пустой список spawn-правил — конфиг отклоняется")
     void emptySpawnRulesAreRejected() {
-        fail("Тест не реализован");
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new CampaignConfig(
+                        4,
+                        100,
+                        Map.of(), // ← пустой
+                        Map.of(2, 0, 4, 50, 8, 150, 16, 500, 32, 2000),
+                        32,
+                        new BigDecimal("0.20")));
     }
 }

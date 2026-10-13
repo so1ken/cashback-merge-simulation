@@ -1,7 +1,14 @@
 package academy.cashbackmerge.mandatory.mr1;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import academy.cashbackmerge.config.CampaignConfig;
+import academy.cashbackmerge.config.ConfigReader;
+import academy.cashbackmerge.model.Board;
+import academy.cashbackmerge.model.GameSession;
+import academy.cashbackmerge.service.GameService;
+import java.io.IOException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,10 +18,15 @@ import org.junit.jupiter.api.Test;
 class SeedTest {
 
     @Test
-    @Disabled("MR1: реализуй тест и удали эту строку")
     @DisplayName("Одинаковый конфиг и seed дают одинаковое начальное поле")
-    void sameConfigAndSeedProduceSameInitialBoard() {
-        fail("Тест не реализован");
+    void sameConfigAndSeedProduceSameInitialBoard() throws IOException {
+        CampaignConfig config = ConfigReader.read("config/campaign.example.json");
+        GameService service = new GameService(config);
+
+        GameSession first = service.startGame(42L);
+        GameSession second = service.startGame(42L);
+
+        assertThat(boardsEqual(first.getBoard(), second.getBoard())).isTrue();
     }
 
     @Test
@@ -22,5 +34,30 @@ class SeedTest {
     @DisplayName("Одинаковый конфиг, seed и стратегия дают одинаковый отчёт симуляции")
     void sameInputsProduceSameSimulationReport() {
         fail("Тест не реализован");
+    }
+
+    /** Сравнивает два поля 4x4 поэлементно. */
+    private static boolean boardsEqual(Board first, Board second) {
+        if (first.getBoardSize() != second.getBoardSize()) {
+            return false;
+        }
+        for (int row = 0; row < first.getBoardSize(); row++) {
+            for (int col = 0; col < first.getBoardSize(); col++) {
+                if (!tilesEqual(first.getTile(row, col), second.getTile(row, col))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean tilesEqual(academy.cashbackmerge.model.Tile a, academy.cashbackmerge.model.Tile b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return a.cashback() == b.cashback();
     }
 }

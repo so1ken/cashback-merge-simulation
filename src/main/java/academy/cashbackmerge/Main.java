@@ -1,20 +1,27 @@
 package academy.cashbackmerge;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import academy.cashbackmerge.config.CampaignConfig;
+import academy.cashbackmerge.config.ConfigReader;
+import academy.cashbackmerge.model.GameSession;
+import academy.cashbackmerge.service.GameService;
+import academy.cashbackmerge.ui.ConsoleUI;
+import java.io.IOException;
 
-/** Точка входа в Cashback Merge. */
 public final class Main {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final long DEMO_SEED = 42L;
 
     private Main() {}
 
     public static void main(String[] args) {
-        LOG.debug("Аргументы запуска: {}", String.join(" ", args));
+        try {
+            CampaignConfig config = ConfigReader.read("config/campaign.example.json");
+            GameService service = new GameService(config);
+            GameSession session = service.startGame(DEMO_SEED);
 
-        // TODO: разобрать аргументы и запустить нужный режим.
-        System.out.println("Cashback Merge — шаблон проекта Т-Академии.");
-        System.out.println("Ничего ещё не реализовано. Начни с README.");
+            ConsoleUI ui = new ConsoleUI();
+            ui.printBoard(session.getBoard());
+        } catch (IOException e) {
+            System.err.println("Не удалось загрузить конфиг: " + e.getMessage());
+        }
     }
 }
