@@ -35,3 +35,24 @@
 - **Унификация направлений:** RIGHT/DOWN — реверс линии, обработка как LEFT/UP, реверс обратно. Один `processLine` на все направления.
 - **`Random` в `GameSession`:** seed один на партию, включая spawn после ходов.
 - **Валидность хода:** `processLine` возвращает `changed` — сравнивает линию до/после. Если ни одна линия не изменилась — ход невалиден.
+
+## MR3 — Награды, симуляция, отчёт
+
+### Реализовано
+- `PlayerStrategy` — интерфейс для стратегий ботов.
+- `RandomStrategy` — бот, выбирающий случайное направление.
+- `SimulationReport` — record с результатами симуляции.
+- `Simulator` — движок симуляции: запускает N партий, собирает статистику.
+- `MarkdownReportWriter` — генератор отчёта в формате Markdown.
+- `GameService.getReward()` — награда по максимальной плитке (если плитка >= `maxRewardCashback`, выдаётся максимальная награда).
+- Команда `simulate` в CLI с аргументами `--config`, `--players`, `--strategy`, `--seed`, `--output`.
+- Проверка бизнес-ограничения: `actualMaxRewardRate <= maxRewardAllowedRate -> OK, иначе FAILED`.
+
+### Запуск симуляции
+```bash
+./gradlew run --args="simulate --config config/campaign.example.json --players 1000 --strategy random --seed 42 --output report.md" --console=plain
+```
+### Принятые решения
+- Паттерн «Стратегия»: движок Simulator не знает, как именно бот выбирает ход. Он просто вызывает strategy.chooseMove(). Это позволяет легко добавить GreedyStrategy в будущем.
+- Обработка невалидных ходов: в симуляции случайный бот может часто биться в стену. Если ход не меняет поле, Simulator пробует остальные три направления. Если все невалидны — игра прерывается.
+

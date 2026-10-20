@@ -20,9 +20,7 @@ public final class GameService {
     }
 
     public GameSession startGame(long seed) {
-        Random random = new Random(seed);
         Board board = new Board(config.getBoardSize());
-
         GameSession session = new GameSession(board, config.getMovesLimit(), seed);
 
         placeRandomTile(session.getBoard(), session.getRandom());
@@ -165,6 +163,13 @@ public final class GameService {
         boolean changed = !line.equals(merged);
 
         return new LineResult(merged, score, changed);
+    }
+
+    public int getReward(int cashback) {
+        if (cashback >= config.getMaxRewardCashback()) {
+            return config.getRewardTable().getOrDefault(config.getMaxRewardCashback(), 0);
+        }
+        return config.getRewardTable().getOrDefault(cashback, 0);
     }
 
     private record LineResult(List<Tile> line, int scoreGained, boolean changed) {}
